@@ -10,6 +10,7 @@ import com.wangweicheng.common.Invocation;
 import com.wangweicheng.register.LocalRegister;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -24,9 +25,12 @@ public class HttpServerHandler {
            Invocation invocation = (Invocation) new ObjectInputStream(req.getInputStream()).readObject();
             String interfaceName = invocation.getInterfaceName();
 
-            Class classImpl = LocalRegister.get(interfaceName);
+            Class classImpl = LocalRegister.get(interfaceName, "1.0");
             Method method = classImpl.getMethod(invocation.getMethodName(), invocation.getParametersTypes());
-            Object result = method.invoke(classImpl.newInstance(), invocation.getParameters());
+            String result = (String) method.invoke(classImpl.newInstance(), invocation.getParameters());
+
+            //写到resp中
+            IOUtils.write(result, resp.getOutputStream());
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {
