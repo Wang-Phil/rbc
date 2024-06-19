@@ -7,11 +7,15 @@ package com.wangweicheng.proxy;
  */
 
 import com.wangweicheng.common.Invocation;
+import com.wangweicheng.common.URL;
+import com.wangweicheng.loadbalance.Loadbalance;
 import com.wangweicheng.protocal.HttpClient;
+import com.wangweicheng.register.MapRemoteRegister;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.List;
 
 public class ProxyFactory {
     //产生代理对象
@@ -24,8 +28,16 @@ public class ProxyFactory {
                 Invocation invocation =  new Invocation(interfaceClass.getName(),
                         method.getName(), method.getParameterTypes(), args);
                 HttpClient httpClient = new HttpClient();
+
+                //服务发现
+                List<URL> urls = MapRemoteRegister.get(interfaceClass.getName());
+
+                //负载均衡
+                URL url = Loadbalance.random(urls);
+
+                //服务调用
                 //localhost还需要优化，让其可以配置
-                String result = httpClient.send("localhost", 8080, invocation);
+                String result = httpClient.send(url.getHostname(), url.getPort(), invocation);
                 //invoke返回值就是代理对象执行的返回值
                 return result;
             }
