@@ -8,14 +8,14 @@ package com.wangweicheng;
 
 import com.wangweicheng.common.Invocation;
 import com.wangweicheng.protocal.HttpClient;
+import com.wangweicheng.proxy.ProxyFactory;
 
 public class Comsumer {
     public static void main(String[] args) {
-        Invocation invocation =  new Invocation(HelloService.class.getName(),
-        "sayHello", new Class[]{String.class}, new Object[]{"wangweicheng"});
-
-        HttpClient httpClient = new HttpClient();
-        String result = httpClient.send("localhost", 8080, invocation);
+        //得到代理对象
+        HelloService helloService = ProxyFactory.getProxy(HelloService.class);
+        //代理对象执行sayhello方法
+        String result = helloService.sayHello("wangweicheng");
         System.out.println(result);
     }
 }
