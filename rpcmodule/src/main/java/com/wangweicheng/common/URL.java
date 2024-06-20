@@ -6,7 +6,10 @@ package com.wangweicheng.common;
  *@Time: 22:43
  */
 
-public class URL {
+import java.io.Serializable;
+
+//支持序列化，存储到文件中
+public class URL implements Serializable {
     private String hostname;
     private Integer port;
 

@@ -18,7 +18,7 @@ public class Provider {
         LocalRegister.register(HelloService.class.getName(), "2.0" ,HelloServiceImpl2.class);
 
         //注册中心注册，存储对应的端口号和ip地址
-        URL url = new URL("hostname",8080);
+        URL url = new URL("localhost",8080);
         MapRemoteRegister.register(HelloService.class.getName(),url);
 
         //支持网络请求netty，tomcat，socket

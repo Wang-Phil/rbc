@@ -2,6 +2,7 @@ package com.wangweicheng.register;
 
 import com.wangweicheng.common.URL;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,8 +25,41 @@ public class MapRemoteRegister {
         }
         list.add(url);
         map.put(interfaceName, list);
+        //存到文件中
+        saveFile();
     }
     public static List<URL> get(String interfaceName){
+        //从文件中获取
+        map = getFiles();
         return map.get(interfaceName);
     }
+
+    private static void  saveFile(){
+        try {
+            FileOutputStream fos = new FileOutputStream("/temp.txt");
+            ObjectOutputStream objectInputStream = new ObjectOutputStream(fos);
+            objectInputStream.writeObject(map);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    //通过文件来共享map
+    private static Map<String, List<URL>> getFiles(){
+        try {
+            FileInputStream fis = new FileInputStream("/temp.txt");
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            return (Map<String, List<URL>>) ois.readObject();
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
 }
