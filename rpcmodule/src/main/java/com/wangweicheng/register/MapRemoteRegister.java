@@ -59,7 +59,6 @@ public class MapRemoteRegister {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-
     }
 
 }

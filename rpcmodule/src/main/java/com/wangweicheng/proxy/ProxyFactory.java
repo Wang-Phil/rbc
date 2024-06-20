@@ -35,10 +35,18 @@ public class ProxyFactory {
                 //负载均衡
                 URL url = Loadbalance.random(urls);
 
-                //服务调用
-                //localhost还需要优化，让其可以配置
-                String result = httpClient.send(url.getHostname(), url.getPort(), invocation);
-                //invoke返回值就是代理对象执行的返回值
+                String result = null;
+                //实现报错更友好
+                try{
+                    //服务调用
+                    //localhost还需要优化，让其可以配置
+                    result = httpClient.send(url.getHostname(), url.getPort(), invocation);
+                    //invoke返回值就是代理对象执行的返回值
+                }catch (Exception e){
+                    //给配置项，error-callback=com.wangweicheng.HelloServiceErrorCallback
+                    //容错逻辑
+                    return "报错了";
+                }
                 return result;
             }
         });
