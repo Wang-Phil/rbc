@@ -15,6 +15,7 @@ import com.wangweicheng.register.MapRemoteRegister;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProxyFactory {
@@ -32,21 +33,35 @@ public class ProxyFactory {
                 //服务发现
                 List<URL> urls = MapRemoteRegister.get(interfaceClass.getName());
 
-                //负载均衡
-                URL url = Loadbalance.random(urls);
-
+                //服务调用
                 String result = null;
+                List<URL> invokeUrls = new ArrayList<URL>();        //保存已经调用过的服务
                 //实现报错更友好
-                try{
-                    //服务调用
-                    //localhost还需要优化，让其可以配置
-                    result = httpClient.send(url.getHostname(), url.getPort(), invocation);
-                    //invoke返回值就是代理对象执行的返回值
-                }catch (Exception e){
-                    //给配置项，error-callback=com.wangweicheng.HelloServiceErrorCallback
-                    //容错逻辑
-                    return "报错了";
+
+                //服务重试
+                int max = 2;
+                while(max > 0){
+
+                    //负载均衡
+                    urls.remove(invokeUrls);        //排出当前的已经调用过的服务
+                    URL url = Loadbalance.random(urls);
+                    invokeUrls.add(url);            //将当前服务加入到list中
+
+                    try{
+
+                        //localhost还需要优化，让其可以配置
+                        result = httpClient.send(url.getHostname(), url.getPort(), invocation);
+                        //invoke返回值就是代理对象执行的返回值
+                    }catch (Exception e){
+                        //服务重试
+                        if(max-- > 0) continue;
+                        //给配置项，error-callback=com.wangweicheng.HelloServiceErrorCallback
+                        //容错逻辑
+                        return "报错了";
+                    }
                 }
+
+
                 return result;
             }
         });
