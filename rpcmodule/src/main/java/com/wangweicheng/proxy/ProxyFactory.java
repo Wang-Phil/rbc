@@ -25,6 +25,14 @@ public class ProxyFactory {
         Object proxyInstance = Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass}, new InvocationHandler() {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+
+                //服务Mock
+                String mock = System.getProperty("mock");
+                if (mock != null && mock.startsWith("return:")) {
+                    String result = mock.replace("return:", "");
+                    return result;
+                }
+
                 //invocation对象从原来的自己创建到现在可以用invoke对象里面的参数来进行实例化invocation对象
                 Invocation invocation =  new Invocation(interfaceClass.getName(),
                         method.getName(), method.getParameterTypes(), args);
